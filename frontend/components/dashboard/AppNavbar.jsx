@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function AppNavbar() {
+export default function AppNavbar({ subtitle = "Dashboard" }) {
   return (
     <header className="sticky top-0 z-40 border-b border-white/60 bg-white/75 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -10,7 +10,7 @@ export default function AppNavbar() {
           </span>
           <span>
             <span className="block text-lg font-black leading-5 text-slate-950">WorkCred</span>
-            <span className="hidden text-xs font-semibold text-slate-500 sm:block">Worker profile studio</span>
+            <span className="hidden text-xs font-semibold text-slate-500 sm:block">{subtitle}</span>
           </span>
         </Link>
         <div className="flex items-center gap-2">

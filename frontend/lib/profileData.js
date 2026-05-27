@@ -27,31 +27,19 @@ export const availabilityOptions = [
 ];
 
 export const initialProfile = {
-  fullName: "Rohan Patil",
-  phone: "9876543210",
-  email: "rohan.patil@example.com",
-  address: "Pune, Maharashtra",
+  fullName: "",
+  phone: "",
+  email: "",
+  address: "",
   dateOfBirth: "",
-  gender: "Male",
-  bio: "Reliable worker with experience in customer-facing service and daily operations.",
-  category: "waiter",
-  availability: "available",
-  experienceLevel: "Intermediate",
-  skills: ["Customer service", "Cash management"],
-  languages: [
-    { name: "Hindi", proficiency: "Native" },
-    { name: "English", proficiency: "Conversational" }
-  ],
-  experiences: [
-    {
-      company: "Cafe Nova",
-      role: "Waiter",
-      startDate: "2024-01",
-      endDate: "2025-04",
-      current: false,
-      description: "Handled table service, billing support, and daily customer requests."
-    }
-  ],
+  gender: "",
+  bio: "",
+  category: "",
+  availability: "",
+  experienceLevel: "Beginner",
+  skills: [],
+  languages: [],
+  experiences: [],
   photo: null,
   resume: null
 };

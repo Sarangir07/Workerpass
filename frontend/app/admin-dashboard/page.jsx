@@ -1,5 +1,5 @@
-import DashboardPlaceholder from "../../components/auth/DashboardPlaceholder";
+import AdminPage from "../../components/admin/AdminPage";
 
 export default function AdminDashboardPage() {
-  return <DashboardPlaceholder role="admin" />;
+  return <AdminPage section="dashboard" />;
 }

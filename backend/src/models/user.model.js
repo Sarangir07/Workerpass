@@ -26,7 +26,13 @@ const userSchema = new mongoose.Schema(
     userType: {
       type: String,
       enum: USER_TYPES,
-      required: true
+      required: true,
+      default: "worker"
+    },
+    role: {
+      type: String,
+      enum: USER_TYPES,
+      default: "worker"
     },
     isOtpVerified: {
       type: Boolean,
@@ -57,6 +63,22 @@ const userSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+userSchema.pre("validate", function syncRoleAndUserType(next) {
+  if (!this.role && this.userType) {
+    this.role = this.userType;
+  }
+
+  if (!this.userType && this.role) {
+    this.userType = this.role;
+  }
+
+  if (this.isNew && this.userType && this.role === "worker" && this.userType !== "worker") {
+    this.role = this.userType;
+  }
+
+  next();
+});
 
 userSchema.pre("save", async function hashPassword(next) {
   if (!this.isModified("password")) {

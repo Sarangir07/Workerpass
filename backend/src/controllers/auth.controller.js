@@ -8,6 +8,7 @@ function userResponse(user) {
     name: user.name,
     email: user.email,
     userType: user.userType,
+    role: user.role || user.userType,
     isOtpVerified: user.isOtpVerified,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
@@ -33,7 +34,7 @@ async function signup(req, res, next) {
     }
 
     const otp = generateOtp();
-    const user = new User({ name, email, password, userType });
+    const user = new User({ name, email, password, userType, role: userType });
     await user.setEmailVerificationOtp(otp);
     await user.save();
 
@@ -80,6 +81,7 @@ async function adminSignup(req, res, next) {
       email,
       password,
       userType: "admin",
+      role: "admin",
       isOtpVerified: true
     });
 

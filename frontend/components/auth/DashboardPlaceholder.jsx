@@ -41,7 +41,7 @@ export default function DashboardPlaceholder({ role }) {
           </Link>
           <div className="flex items-center gap-3">
             {role === "worker" && (
-              <Link className="rounded-lg bg-white px-4 py-2 text-sm font-black text-slate-950" href="/worker-profile">
+              <Link className="rounded-lg bg-white px-4 py-2 text-sm font-black text-slate-950" href="/worker-dashboard">
                 Profile
               </Link>
             )}

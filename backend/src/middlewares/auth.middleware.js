@@ -34,7 +34,14 @@ function authorize(...allowedUserTypes) {
   };
 }
 
+const authMiddleware = authenticate;
+const workerOnly = authorize("worker");
+const employerOnly = authorize("employer");
+
 module.exports = {
   authenticate,
-  authorize
+  authMiddleware,
+  authorize,
+  workerOnly,
+  employerOnly
 };

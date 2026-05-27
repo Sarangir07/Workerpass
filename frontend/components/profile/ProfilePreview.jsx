@@ -25,7 +25,6 @@ export default function ProfilePreview({ completion, profile }) {
                 </span>
               </div>
               <p className="mt-1 text-slate-300">{category?.label || "Worker"} in {profile.address || "your city"}</p>
-              <p className="mt-3 text-sm font-bold text-cyan-200">Rating placeholder: 4.8 / 5.0</p>
             </div>
           </div>
         </div>
@@ -42,8 +41,9 @@ export default function ProfilePreview({ completion, profile }) {
             <div className="mt-6">
               <h4 className="text-sm font-black text-slate-900">Experience summary</h4>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                {profile.experiences.length} role{profile.experiences.length === 1 ? "" : "s"} added, with{" "}
-                {profile.experienceLevel.toLowerCase()} skill confidence.
+                {profile.experiences.length === 0
+                  ? "No experience added yet."
+                  : `${profile.experiences.length} role${profile.experiences.length === 1 ? "" : "s"} added, with ${profile.experienceLevel.toLowerCase()} skill confidence.`}
               </p>
             </div>
           </div>
@@ -54,7 +54,7 @@ export default function ProfilePreview({ completion, profile }) {
               <div className="h-full rounded-full bg-emerald-500" style={{ width: `${completion}%` }} />
             </div>
             <p className="mt-5 text-sm font-bold text-slate-500">Availability</p>
-            <p className="mt-1 font-black text-slate-950">{availability?.label}</p>
+            <p className="mt-1 font-black text-slate-950">{availability?.label || "Not selected"}</p>
           </aside>
         </div>
       </div>

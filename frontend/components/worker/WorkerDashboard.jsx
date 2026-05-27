@@ -1,26 +1,29 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import AppNavbar from "../../components/dashboard/AppNavbar";
-import Sidebar from "../../components/dashboard/Sidebar";
-import StatCard from "../../components/dashboard/StatCard";
-import AvailabilitySection from "../../components/profile/AvailabilitySection";
-import CategorySection from "../../components/profile/CategorySection";
-import ExperienceSection from "../../components/profile/ExperienceSection";
-import FileUploadSection from "../../components/profile/FileUploadSection";
-import LanguagesSection from "../../components/profile/LanguagesSection";
-import PersonalDetailsSection from "../../components/profile/PersonalDetailsSection";
-import ProfilePreview from "../../components/profile/ProfilePreview";
-import SectionCard from "../../components/profile/SectionCard";
-import SkillsSection from "../../components/profile/SkillsSection";
-import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
-import Skeleton from "../../components/ui/Skeleton";
-import Toast from "../../components/ui/Toast";
+import AppNavbar from "../dashboard/AppNavbar";
+import Sidebar from "../dashboard/Sidebar";
+import StatCard from "../dashboard/StatCard";
+import AvailabilitySection from "../profile/AvailabilitySection";
+import { getCurrentWorkerProfile, mapWorkerProfileFromApi, saveWorkerProfile } from "../profile/api";
+import CategorySection from "../profile/CategorySection";
+import ExperienceSection from "../profile/ExperienceSection";
+import FileUploadSection from "../profile/FileUploadSection";
+import LanguagesSection from "../profile/LanguagesSection";
+import PersonalDetailsSection from "../profile/PersonalDetailsSection";
+import ProfilePreview from "../profile/ProfilePreview";
+import SectionCard from "../profile/SectionCard";
+import EmptyState from "../profile/EmptyState";
+import SkillsSection from "../profile/SkillsSection";
+import Button from "../ui/Button";
+import Skeleton from "../ui/Skeleton";
+import Toast from "../ui/Toast";
+import WorkerJobSummary from "./WorkerJobSummary";
 import useProfileCompletion from "../../hooks/useProfileCompletion";
 import { availabilityOptions, initialProfile, workerCategories } from "../../lib/profileData";
+import { getWorkerVerifications } from "../verification/api";
 
-export default function WorkerProfilePage() {
+export default function WorkerDashboard() {
   const [profile, setProfile] = useState(initialProfile);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -28,12 +31,58 @@ export default function WorkerProfilePage() {
   const [toastType, setToastType] = useState("success");
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("overview");
-  const [modalOpen, setModalOpen] = useState(false);
+  const [verificationItems, setVerificationItems] = useState([]);
   const completion = useProfileCompletion(profile);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timeout);
+    let mounted = true;
+
+    async function loadProfile() {
+      try {
+        const existingProfile = await getCurrentWorkerProfile();
+
+        if (mounted && existingProfile) {
+          setProfile(existingProfile);
+        }
+      } catch (error) {
+        if (mounted) {
+          setToastType("error");
+          setToast(error.message || "Could not load your worker profile.");
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadVerifications() {
+      try {
+        const data = await getWorkerVerifications();
+
+        if (mounted) {
+          setVerificationItems(data);
+        }
+      } catch (error) {
+        if (mounted) {
+          setVerificationItems([]);
+        }
+      }
+    }
+
+    loadVerifications();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const category = useMemo(
@@ -43,6 +92,14 @@ export default function WorkerProfilePage() {
   const availability = useMemo(
     () => availabilityOptions.find((item) => item.id === profile.availability),
     [profile.availability]
+  );
+  const verificationStats = useMemo(
+    () => ({
+      approved: verificationItems.filter((item) => item.verificationStatus === "Approved").length,
+      pending: verificationItems.filter((item) => item.verificationStatus === "Pending").length,
+      rejected: verificationItems.filter((item) => item.verificationStatus === "Rejected").length
+    }),
+    [verificationItems]
   );
 
   function updateProfile(field, value) {
@@ -66,20 +123,26 @@ export default function WorkerProfilePage() {
     return Object.keys(nextErrors).length === 0;
   }
 
-  function saveProfile() {
+  async function saveProfile() {
     if (!validate()) {
       setToastType("error");
       setToast("Please fix the highlighted fields.");
       return;
     }
 
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      setSaving(true);
+      setToast("");
+      const savedProfile = await saveWorkerProfile(profile);
+      setProfile(mapWorkerProfileFromApi(savedProfile));
       setToastType("success");
-      setToast("Profile saved locally. Form is ready for API integration.");
-      setModalOpen(true);
-    }, 700);
+      setToast("Worker dashboard saved successfully.");
+    } catch (error) {
+      setToastType("error");
+      setToast(error.message || "Worker dashboard save failed.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (loading) {
@@ -101,14 +164,8 @@ export default function WorkerProfilePage() {
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#b6f0e7_0,#eef7fb_28%,#f8fafc_62%,#eef2ff_100%)]">
-      <AppNavbar />
+      <AppNavbar subtitle="Worker Dashboard" />
       <Toast message={toast} type={toastType} />
-      <Modal open={modalOpen} title="Profile payload ready" onClose={() => setModalOpen(false)}>
-        <p className="text-sm leading-6 text-slate-600">
-          This frontend has collected personal details, skills, experience, languages, files, category, and availability.
-          Connect this form to the worker profile API when backend integration is needed.
-        </p>
-      </Modal>
 
       <div className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[240px_1fr] lg:px-8">
         <Sidebar activeSection={activeSection} onSelect={selectSection} />
@@ -120,12 +177,12 @@ export default function WorkerProfilePage() {
           >
             <div className="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1fr_300px]">
               <div>
-                <p className="text-sm font-black uppercase text-cyan-700">Worker profile dashboard</p>
+                <p className="text-sm font-black uppercase text-cyan-700">Worker Dashboard</p>
                 <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
                   Welcome back, {profile.fullName.split(" ")[0] || "Worker"}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                  Manage your WorkCred profile, show verified skills, and help employers understand your fit before
+                  Manage your WorkCred dashboard, show verified skills, and help employers understand your fit before
                   they contact you.
                 </p>
                 <div className="mt-6">
@@ -141,8 +198,8 @@ export default function WorkerProfilePage() {
 
               <div className="rounded-2xl bg-slate-950 p-5 text-white">
                 <p className="text-sm font-black text-cyan-200">Current status</p>
-                <h2 className="mt-5 text-2xl font-black">{category?.label}</h2>
-                <p className="mt-2 text-sm text-slate-300">{availability?.label}</p>
+                <h2 className="mt-5 text-2xl font-black">{category?.label || "Not selected"}</h2>
+                <p className="mt-2 text-sm text-slate-300">{availability?.label || "Set your availability"}</p>
                 <Button className="mt-6 w-full" type="button" variant="secondary" onClick={() => selectSection("preview")}>
                   View preview
                 </Button>
@@ -159,24 +216,27 @@ export default function WorkerProfilePage() {
 
           <div className="grid gap-5 lg:grid-cols-2">
             <SectionCard title="Recent Activity" subtitle="Latest profile changes and verification events.">
-              <div className="space-y-3">
-                {["Profile photo area is ready", "Skills summary updated", "Resume card prepared"].map((item) => (
-                  <div className="rounded-xl border border-slate-200 bg-white/70 p-4 text-sm font-bold text-slate-700" key={item}>
-                    {item}
-                  </div>
-                ))}
-              </div>
+              <EmptyState title="No recent activity" text="Activity will appear after you update your worker profile." />
             </SectionCard>
-            <SectionCard title="Notifications" subtitle="Preview of worker profile alerts.">
-              <div className="space-y-3">
-                {["Complete resume upload for stronger visibility", "Add one more language to improve matching", "Verification badge preview is active"].map((item) => (
-                  <div className="rounded-xl bg-cyan-50 p-4 text-sm font-bold text-cyan-900" key={item}>
-                    {item}
-                  </div>
-                ))}
-              </div>
+            <SectionCard title="Notifications" subtitle="Worker dashboard alerts and reminders.">
+              <EmptyState title="No notifications" text="New worker dashboard alerts will appear here." />
             </SectionCard>
           </div>
+
+          <WorkerJobSummary />
+
+          <SectionCard
+            id="verification"
+            title="Experience Verification"
+            subtitle="Request digital proof of previous work from employers and track approval status."
+            action={<Button href="/worker-dashboard/experience" type="button" variant="soft">Open verification</Button>}
+          >
+            <div className="grid gap-4 sm:grid-cols-3">
+              <StatCard label="Verified experiences" value={verificationStats.approved} tone="emerald" />
+              <StatCard label="Pending requests" value={verificationStats.pending} tone="amber" />
+              <StatCard label="Rejected requests" value={verificationStats.rejected} tone="slate" />
+            </div>
+          </SectionCard>
 
           <PersonalDetailsSection
             errors={errors}
@@ -196,10 +256,10 @@ export default function WorkerProfilePage() {
           <div className="flex flex-col gap-3 rounded-2xl border border-white/70 bg-white/75 p-5 shadow-xl shadow-slate-900/5 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-black text-slate-950">Ready to publish?</h2>
-              <p className="mt-1 text-sm text-slate-600">This action is UI-only and prepared for a future API request.</p>
+              <p className="mt-1 text-sm text-slate-600">Save your latest worker dashboard details to the API.</p>
             </div>
             <Button loading={saving} type="button" onClick={saveProfile}>
-              Save worker profile
+              Save worker dashboard
             </Button>
           </div>
         </div>

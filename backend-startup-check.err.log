@@ -1,0 +1,2 @@
+Chat index setup failed: An existing index has the same name as the requested index. When index names are not specified, they are auto generated and can cause conflicts. Please refer to our documentation. Requested index: { v: 2, unique: true, key: { application: 1 }, name: "application_1", sparse: true, background: true }, existing index: { v: 2, unique: true, key: { application: 1 }, name: "application_1", background: true }
+HTTP server error: listen EADDRINUSE: address already in use :::5000

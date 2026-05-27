@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { postAuth, saveAuthSession } from "../../components/auth/api";
 import AuthCard from "../../components/auth/AuthCard";
 import AuthShell from "../../components/auth/AuthShell";
 import PasswordField from "../../components/auth/PasswordField";
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   function updateField(event) {
     const { name, value, checked, type } = event.target;
@@ -24,7 +26,7 @@ export default function LoginPage() {
     setErrors((current) => ({ ...current, [name]: "" }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = {};
 
@@ -33,21 +35,34 @@ export default function LoginPage() {
 
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
+      setToastType("error");
       setToast("Login form needs a little attention.");
       return;
     }
 
-    setLoading(true);
-    setToast("Login UI validated. Redirecting by role.");
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      setToast("");
+      const data = await postAuth("/auth/login", {
+        email: form.identifier,
+        password: form.password
+      });
+
+      saveAuthSession(data);
+      setToastType("success");
+      setToast(data.message || "Login successful. Redirecting...");
+      setTimeout(() => router.push("/dashboard-redirect"), 500);
+    } catch (error) {
+      setToastType("error");
+      setToast(error.message || "Login failed. Please try again.");
+    } finally {
       setLoading(false);
-      router.push("/dashboard-redirect");
-    }, 700);
+    }
   }
 
   return (
     <AuthShell>
-      <Toast message={toast} type={Object.keys(errors).length ? "error" : "success"} />
+      <Toast message={toast} type={toastType} />
       <div className="mx-auto grid w-full max-w-5xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_440px] lg:px-8">
         <div className="hidden self-center lg:block">
           <p className="text-sm font-black uppercase text-cyan-700">Secure sign in</p>

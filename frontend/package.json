@@ -9,9 +9,13 @@
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.0",
+    "axios": "^1.16.1",
+    "lucide-react": "^1.16.0",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "recharts": "^3.8.1",
+    "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.3.0"
   }
 }

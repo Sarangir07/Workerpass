@@ -7,7 +7,7 @@ import EmptyState from "./EmptyState";
 import SectionCard from "./SectionCard";
 
 export default function LanguagesSection({ onUpdate, profile }) {
-  const [draft, setDraft] = useState({ name: "English", proficiency: "Conversational" });
+  const [draft, setDraft] = useState({ name: "", proficiency: "Conversational" });
 
   function addLanguage(name = draft.name) {
     if (!name.trim()) return;

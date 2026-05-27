@@ -31,6 +31,18 @@ const experienceSchema = new mongoose.Schema(
       min: 0,
       default: 0
     },
+    startDate: {
+      type: String,
+      trim: true
+    },
+    endDate: {
+      type: String,
+      trim: true
+    },
+    current: {
+      type: Boolean,
+      default: false
+    },
     description: {
       type: String,
       trim: true
@@ -61,6 +73,14 @@ const workerProfileSchema = new mongoose.Schema(
       type: String,
       required: true,
       lowercase: true,
+      trim: true
+    },
+    dateOfBirth: {
+      type: String,
+      trim: true
+    },
+    gender: {
+      type: String,
       trim: true
     },
     location: {

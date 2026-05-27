@@ -1,5 +1,5 @@
-import DashboardPlaceholder from "../../components/auth/DashboardPlaceholder";
+import WorkerDashboard from "../../components/worker/WorkerDashboard";
 
 export default function WorkerDashboardPage() {
-  return <DashboardPlaceholder role="worker" />;
+  return <WorkerDashboard />;
 }

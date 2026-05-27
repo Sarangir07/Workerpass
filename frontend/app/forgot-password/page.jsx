@@ -58,8 +58,8 @@ export default function ForgotPasswordPage() {
               <Link className="text-slate-600 hover:text-slate-950" href="/login">
                 Back to login
               </Link>
-              <Link className="text-cyan-800 hover:text-cyan-950" href="/verify-otp">
-                Verify OTP
+              <Link className="text-cyan-800 hover:text-cyan-950" href="/reset-password">
+                Reset password
               </Link>
             </div>
           </form>

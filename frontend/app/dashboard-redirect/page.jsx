@@ -19,7 +19,7 @@ export default function DashboardRedirectPage() {
   useEffect(() => {
     const savedUser = window.localStorage.getItem("workcred_user");
     const savedRole = savedUser
-      ? JSON.parse(savedUser).userType
+      ? JSON.parse(savedUser).role || JSON.parse(savedUser).userType
       : window.localStorage.getItem("workcred_demo_role") || "worker";
     setRole(savedRole);
     const timeout = setTimeout(() => setReady(true), 1300);

@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { postAuth, saveAuthSession } from "../../components/auth/api";
 import AuthCard from "../../components/auth/AuthCard";
 import AuthShell from "../../components/auth/AuthShell";
 import PasswordField from "../../components/auth/PasswordField";
@@ -23,10 +25,12 @@ const initialForm = {
 };
 
 export default function SignupPage() {
+  const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   function updateField(event) {
     const { name, value, files } = event.target;
@@ -48,25 +52,40 @@ export default function SignupPage() {
     return Object.keys(nextErrors).length === 0;
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!validate()) {
+      setToastType("error");
       setToast("Please fix the highlighted fields.");
       return;
     }
 
-    setLoading(true);
-    window.localStorage.setItem("workcred_demo_role", form.role);
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      setToast("");
+      const data = await postAuth("/auth/signup", {
+        name: form.fullName,
+        email: form.email,
+        password: form.password,
+        userType: form.role
+      });
+
+      saveAuthSession(data);
+      setToastType("success");
+      setToast(data.message || "Signup successful. Redirecting...");
+      setTimeout(() => router.push("/dashboard-redirect"), 600);
+    } catch (error) {
+      setToastType("error");
+      setToast(error.message || "Signup failed. Please try again.");
+    } finally {
       setLoading(false);
-      setToast("Account UI validated. Ready to connect to signup API.");
-    }, 800);
+    }
   }
 
   return (
     <AuthShell>
-      <Toast message={toast} type={errors.fullName ? "error" : "success"} />
+      <Toast message={toast} type={toastType} />
       <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <aside className="hidden rounded-2xl border border-white/70 bg-slate-950 p-8 text-white shadow-2xl shadow-slate-900/20 lg:block">
           <p className="text-sm font-black uppercase text-cyan-200">WorkCred access</p>

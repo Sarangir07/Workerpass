@@ -12,7 +12,8 @@ function signAccessToken(user) {
   return jwt.sign(
     {
       id: user._id.toString(),
-      userType: user.userType
+      userType: user.userType,
+      role: user.role || user.userType
     },
     getJwtSecret(),
     {

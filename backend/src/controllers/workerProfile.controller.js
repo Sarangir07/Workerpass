@@ -65,6 +65,8 @@ function buildProfilePayload(req) {
     "fullName",
     "phone",
     "email",
+    "dateOfBirth",
+    "gender",
     "location",
     "jobCategory",
     "customJobTitle",
@@ -113,6 +115,21 @@ function buildProfilePayload(req) {
 async function createWorkerProfile(req, res, next) {
   try {
     const payload = buildProfilePayload(req);
+    const existingProfile = await WorkerProfile.findOne({ user: req.user._id });
+
+    if (existingProfile) {
+      const workerProfile = await WorkerProfile.findOneAndUpdate(
+        { user: req.user._id },
+        payload,
+        {
+          new: true,
+          runValidators: true
+        }
+      );
+
+      return res.json(workerProfile);
+    }
+
     const workerProfile = await WorkerProfile.create({
       ...payload,
       user: req.user._id
