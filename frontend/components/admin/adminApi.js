@@ -1,12 +1,13 @@
 "use client";
 
 import axios from "axios";
+import { API_URL } from "../auth/api";
 
 export const ADMIN_TOKEN_KEY = "workcred_token";
 export const ADMIN_USER_KEY = "workcred_user";
 
 const adminApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+  baseURL: API_URL,
   timeout: 15000
 });
 

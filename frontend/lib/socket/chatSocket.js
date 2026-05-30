@@ -5,7 +5,7 @@ import { getAuthToken } from "../../services/chat/api";
 let socket;
 
 function getSocketUrl() {
-  return process.env.NEXT_PUBLIC_SOCKET_URL || API_URL.replace(/\/api\/?$/, "");
+  return API_URL.replace(/\/api\/?$/, "");
 }
 
 export function getChatSocket() {
